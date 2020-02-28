@@ -20,12 +20,12 @@ type Receipt struct {
 	Quantity              int
 	ProductID             string
 	TransactionID         string
-	PurchaseDate          time.Time
+	PurchaseDate          *time.Time
 	OriginalTransactionID string
-	OriginalPurchaseDate  time.Time
-	ExpiresDate           time.Time
+	OriginalPurchaseDate  *time.Time
+	ExpiresDate           *time.Time
 	WebOrderLineItemID    int
-	CancellationDate      time.Time
+	CancellationDate      *time.Time
 }
 
 // Receipts is the app receipt.
@@ -34,10 +34,10 @@ type Receipts struct {
 	ApplicationVersion         string
 	OpaqueValue                []byte
 	SHA1Hash                   []byte
-	ReceiptCreationDate        time.Time
+	ReceiptCreationDate        *time.Time
 	InApp                      []Receipt
 	OriginalApplicationVersion string
-	ExpirationDate             time.Time
+	ExpirationDate             *time.Time
 
 	rawBundleID []byte
 }
@@ -239,13 +239,14 @@ func parseInApp(data []byte) (ret Receipt, err error) {
 	return
 }
 
-func asn1ParseTime(data []byte) (time.Time, error) {
+func asn1ParseTime(data []byte) (*time.Time, error) {
 	var str string
 	if _, err := asn1.Unmarshal(data, &str); err != nil {
-		return time.Time{}, err
+		return nil, err
 	}
 	if str == "" {
-		return time.Time{}, nil
+		return nil, nil
 	}
-	return time.Parse(time.RFC3339, str)
+	t, err := time.Parse(time.RFC3339, str)
+	return &t, err
 }
